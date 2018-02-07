@@ -3,3 +3,4 @@ from pirates import *
 from math import *
 
 # Deals with enything asteroid
+__name__ = 'asteroid'
