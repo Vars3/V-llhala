@@ -41,13 +41,8 @@ def divide_living_pirates(game):
     living_pirates = game.get_my_living_pirates()
     # sorting the living pirates according to their distance to the enemy's mothership
     # TO DO: write a code that deals with a case in which there are 2 enemy motherships
-    try:
-        sorted_pirates = sorted(living_pirates, key=lambda pirate: desirable_enemy_mothership(game).get_location().distance(
-            pirate.get_location()))
-    except:
-        #no enemy motherships, sorting as for nearest to my mothership
-        sorted_pirates = sorted(living_pirates, key=lambda pirate: desirable_mothership(game, pirate).distance(
-            pirate.get_location()))
+    sorted_pirates = sorted(living_pirates, key=lambda pirate: desirable_enemy_mothership(game).get_location().distance(
+        pirate.get_location()))
     for i in xrange(len(living_pirates)):
         if i < num_of_defense:
             defense_pirates.append(sorted_pirates[i])
@@ -73,7 +68,7 @@ def attack(game, attack_pirates):
     # now, the order of pirates within the list will stay the same, uunless a pirate dies.
     # so, the pairs will stay the same.
     attack_pirates = sorted(attack_pirates, key=lambda pirate: pirate.initial_location.distance(
-        desirable_mothership(game, pirate.get_location()).get_location()))
+        desirable_enemy_mothership(game).get_location()))
     is_capsule_taken = [False] * len(game.get_my_capsules())
     for capsule in game.get_my_capsules():
         if capsule.holder is not None:
@@ -84,10 +79,8 @@ def attack(game, attack_pirates):
     for pair in pairs:
         already_acted = False
         if len(pair) > 1:
-            already_acted = asteroid_behavior(game, pair[0], None)
-            already_acted = already_acted orasteroid_behavior(game, pair[1], None)
             # if one of the pair has capsule
-            if pair[0].has_capsule() or pair[1].has_capsule() and already_acted:
+            if pair[0].has_capsule() or pair[1].has_capsule():
                 sorted_pair = capsule_holder(pair[0], pair[1])
                 #if the distance between is too big, narrow it down
                 if pair[0].get_location().distance(pair[1]) > 300:
@@ -124,7 +117,6 @@ def attack(game, attack_pirates):
                     pair[1].sail(game.get_my_capsules()[0].initial_location)
         # if you are only 1 pirate, and u have a capsule, sail
         elif pair[0].has_capsule():
-            asteroid_behavior(game, pair[0], None)
             pair[0].sail(desirable_mothership(game, pair[0]))
             already_acted = True
         #if you dont have a capsule, go find one
@@ -151,45 +143,39 @@ def defense(game, defense_pirates):
     defended_mothership = desirable_enemy_mothership(game)
     # actual range of defense. this value is the range defended before the capsule dropout zone
     # TO DO: understand what the optimal value of distance, maximal for OneManArmy is -50
-    if defended_mothership is None:
-        attack(game, defense_pirates)
+    if len(defense_pirates) == 1:
+        distance = defended_mothership.unload_range - 50
     else:
-        if len(defense_pirates) == 1:
-            distance = defended_mothership.unload_range - 50
-        else:
-            distance = defended_mothership.unload_range + 600
-        
-        pairs = [defense_pirates[i:i + 2] for i in xrange(0, len(defense_pirates), 2)]
+        distance = defended_mothership.unload_range + 600
+    pairs = [defense_pirates[i:i + 2] for i in xrange(0, len(defense_pirates), 2)]
+    already_acted = False
+    is_capsule_pushed = [False] * len(game.get_enemy_capsules())
+    for pair in pairs:
         already_acted = False
-        is_capsule_pushed = [False] * len(game.get_enemy_capsules())
-        for pair in pairs:
-            already_acted = False
-            already_acted = asteroid_behavior(game, pair[0], None)
-            already_acted = already_acted or asteroid_behavior(game, pair[1], None)
-            for capsule in game.get_enemy_capsules():
-                if not is_capsule_pushed[game.get_enemy_capsules().index(capsule)]:
-                    if capsule.holder is not None:
-                        try:
-                            if pair[0].can_push(capsule.holder) and pair[1].can_push(capsule.holder):
-                                pair[0].push(capsule.holder, optimal_pushing_direction(capsule.holder, game))
-                                pair[1].push(capsule.holder, optimal_pushing_direction(capsule.holder, game))
-                                already_acted = True
-                                is_capsule_pushed[game.get_enemy_capsules().index(capsule)] = True
-                        except:
-                            if pair[0].can_push(capsule.holder):
-                                pair[0].push(capsule.holder, optimal_pushing_direction(capsule.holder, game))
-                                already_acted = True
-                                is_capsule_pushed[game.get_enemy_capsules().index(capsule)] = True
-    
-            if not already_acted:
-                pair[0].sail(
+        for capsule in game.get_enemy_capsules():
+            if not is_capsule_pushed[game.get_enemy_capsules().index(capsule)]:
+                if capsule.holder is not None:
+                    try:
+                        if pair[0].can_push(capsule.holder) and pair[1].can_push(capsule.holder):
+                            pair[0].push(capsule.holder, optimal_pushing_direction(capsule.holder, game))
+                            pair[1].push(capsule.holder, optimal_pushing_direction(capsule.holder, game))
+                            already_acted = True
+                            is_capsule_pushed[game.get_enemy_capsules().index(capsule)] = True
+                    except:
+                        if pair[0].can_push(capsule.holder):
+                            pair[0].push(capsule.holder, optimal_pushing_direction(capsule.holder, game))
+                            already_acted = True
+                            is_capsule_pushed[game.get_enemy_capsules().index(capsule)] = True
+
+        if not already_acted:
+            pair[0].sail(
+                defended_mothership.get_location().towards(desirable_enemy(game, defended_mothership), distance))
+            try:
+                pair[1].sail(
                     defended_mothership.get_location().towards(desirable_enemy(game, defended_mothership), distance))
-                try:
-                    pair[1].sail(
-                        defended_mothership.get_location().towards(desirable_enemy(game, defended_mothership), distance))
-                except:
-                    pass
-                distance += 500
+            except:
+                pass
+            distance += 500
 
 
 def asteroid_behavior(game, pirate, next_location):
@@ -201,16 +187,9 @@ def asteroid_behavior(game, pirate, next_location):
     :param game: the current game state, pirate: a pirate, next_location: the pirates next location
     :type game: PirateGame, pirate: Pirate, next_location: Location
     """
-    if Pirate is not None:
-        for asteroid in game.get_living_asteroids():
-            if pirate.can_push(asteroid):
-                try:
-                    pirate.push(asteroid, game.get_enemy_capsules()[0])
-                    return True
-                except:
-                    pirate.push(asteroid, game.get_my_capsules()[0])
-                    return True
-    return False
+    for asteroid in game.get_living_asteroids():
+        pass
+
 
 def can_enemys_push(game, pirate):
     """
