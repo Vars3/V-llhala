@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pirates import *
 from math import *
+import asteroid
 
 """ -------- TO DO LIST ---------
     1. write aan asteroid dealing function, pirates keep killing themselves
