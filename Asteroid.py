@@ -4,3 +4,5 @@ from math import *
 
 # Deals with enything asteroid
 __name__ = 'asteroid'
+
+#lalalala
