@@ -2,43 +2,52 @@
 from pirates import *
 
 
-def asteroid_fun(game, pirate, next_location):
+def asteroid_fun(game, pirate, kargs=[]):
     """
     the function controls the asteroid behavior of the pirate.
-    strategy: checks if thepirate is goiing to collide with an asteroid. if so,
+    strategy: checks if the pirate is going to collide with an asteroid. if so,
     checks if the pirate should and can push the asteroid and to wat direction or let it pass.
+    returns command - ["code", MapObjext/GameObject]
 
-    :param game: the current game state, pirate: a pirate, next_location: the pirates next location
-    :type game: PirateGame, pirate: Pirate, next_location: Location
+    :param game: the current game state, pirate: a pirate, next_location: the pirates next location, kargs: B-compatibility
+    :type game: PirateGame, pirate: Pirate, kargs: list
     """
-    acted = False  # func rets True if pirate acted during it
-    if len(game.get_living_asteroids()) >= 1:
-        for asteroid in game.get_living_asteroids():
-            a_is_close = (pirate.distance(asteroid) <= pirate.push_range)
-            p_can_push = pirate.can_push(asteroid)
-            #a_is_in_direction =
-            if a_is_close and p_can_push:
-                pirate.push(asteroid, (asteroid.direction * (-1)))  # for now assume there are no friendly pirates there
-            elif a_is_close and pirate.push_reload_turns > 0:
+    # acted = False  # func rets True if pirate acted during it
+    if len(game.get_living_asteroids()) < 1:
+        return None
+    for asteroid in game.get_living_asteroids():
+        a_is_close = (pirate.distance(asteroid) <= pirate.push_range)
+        p_can_push = pirate.can_push(asteroid)
+        #a_is_in_direction =
+
+        if a_is_close and p_can_push:
+            # pirate.push(asteroid, (asteroid.direction * (-1)))
+            #  for now assume there are no friendly pirates there
+            return ["PUSH", asteroid, (asteroid.direction * (-1))]
+
+        elif a_is_close and pirate.push_reload_turns > 0:
             # if (asteroid.location + asteroid.direction) == pirate_loc_next_turn(game, pirate)
-            # #<<func not yet written>>, maybe not needed
-                # check if asteroid will hit pirate in 5 turns
-                will_hit = False
-                for t in asteroid_linear(game, asteroid, 5):
-                    if t is pirate.location:
-                        will_hit = True
-                if will_hit: # if it will not hit in 5:
-                    if pirate.location.row > 3200:
-                        y1 = 400
-                    else:
-                            y1 = 6000
-                            if pirate.location.col > 3200:
-                                x1 = 400
-                            else:
-                                x1 = 6000
-                    pirate.sail(asteroid.location.add(x1, y1))
-            else:
-                pass  # not sure if other situation is needed
+            # <<func not yet written>>, maybe not needed
+            # check if asteroid will hit pirate in n turns
+            danger_turns = 2
+            will_hit = False
+            ast_future = asteroid_linear(game, asteroid, danger_turns)
+
+            for t in ast_future:
+                if t is pirate.location:
+                    will_hit = True
+            if will_hit:  # if it will hit in 5:
+                if pirate.location.row > 3200:
+                    y1 = 400
+                else:
+                        y1 = 6000
+                        if pirate.location.col > 3200:
+                            x1 = 400
+                        else:
+                            x1 = 6000
+                pirate.sail(asteroid.location.add(x1, y1))
+        else:
+            pass  # not sure if other situation is needed
 
 
 def asteroid_linear(game, asteroid, n, turns=[]):
