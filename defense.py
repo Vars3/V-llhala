@@ -1,3 +1,13 @@
+"""
+DICTIONARY OF LIFE= { PIRATE.ID: [COMMAND, COMMAND]}
+COMMAND=[CODE,PARAM1,PARAM2]
+COMMAND=[PUSH, WHO, DEST]
+COMMAND=[SAIL, DEST]
+
+
+this is the code for the defense
+"""
+
 from attack import *
 
 
@@ -11,6 +21,7 @@ def defense(game, defense_pirates):
     :type game: PirateGame, defense_pirates: list of Pirate
     """
     if defense_pirates:
+        # the enemy mothership which is closest to a mine.
         defended_mothership = desirable_enemy_mothership(game)
         if defended_mothership == None:
             attack(game, defense_pirates)
@@ -25,9 +36,13 @@ def defense(game, defense_pirates):
             already_acted = False
             is_capsule_pushed = [False] * len(game.get_enemy_capsules())
             for pair in pairs:
+
                 already_acted = False
+                # go over the capsules
                 for capsule in game.get_enemy_capsules():
+                    # if the capsule hasnt been pushed yet
                     if not is_capsule_pushed[game.get_enemy_capsules().index(capsule)]:
+                        # if someone is holding it
                         if capsule.holder is not None:
                             try:
                                 if pair[0].can_push(capsule.holder) and pair[1].can_push(capsule.holder):

@@ -5,20 +5,22 @@ from pirates import *
 def asteroid_fun(game, pirate, next_location):
     """
     the function controls the asteroid behavior of the pirate.
-    strategy: checks if thepirate is goiing to collide with an asteroid. if so,
-    checks if the pirate should and can push the asteroid and to wat direction or let it pass.
+    strategy: checks if the pirate is going to collide with an asteroid. if so,
+    checks if the pirate should and can push the asteroid and to what direction or let it pass.
 
     :param game: the current game state, pirate: a pirate, next_location: the pirates next location
     :type game: PirateGame, pirate: Pirate, next_location: Location
     """
-    acted = False  # func rets True if pirate acted during it
     if len(game.get_living_asteroids()) >= 1:
         for asteroid in game.get_living_asteroids():
             a_is_close = (pirate.distance(asteroid) <= pirate.push_range)
             p_can_push = pirate.can_push(asteroid)
             #a_is_in_direction =
-            if a_is_close and p_can_push:
-                pirate.push(asteroid, (asteroid.direction * (-1)))  # for now assume there are no friendly pirates there
+            if p_can_push:
+            # if you can push an asteroid, push it
+                pirate.push(asteroid, (asteroid.direction * (-1)))
+                # for now assume there are no friendly pirates there
+            # to  do: write a function that checks where will pirates be at the next turn
             elif a_is_close and pirate.push_reload_turns > 0:
             # if (asteroid.location + asteroid.direction) == pirate_loc_next_turn(game, pirate)
             # #<<func not yet written>>, maybe not needed
@@ -31,14 +33,14 @@ def asteroid_fun(game, pirate, next_location):
                     if pirate.location.row > 3200:
                         y1 = 400
                     else:
-                            y1 = 6000
-                            if pirate.location.col > 3200:
-                                x1 = 400
-                            else:
-                                x1 = 6000
+                        y1 = 6000
+                        if pirate.location.col > 3200:
+                            x1 = 400
+                        else:
+                            x1 = 6000
                     pirate.sail(asteroid.location.add(x1, y1))
-            else:
-                pass  # not sure if other situation is needed
+                else:
+                    pass # not sure if other situation is needed
 
 
 def asteroid_linear(game, asteroid, n, turns=[]):
@@ -215,3 +217,5 @@ def desirable_mothership(game, pirate):
 
 
 
+
+								
