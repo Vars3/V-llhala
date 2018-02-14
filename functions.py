@@ -2,7 +2,7 @@
 from pirates import *
 
 
-def asteroid_behavior(game, pirate, next_location):
+def asteroid_fun(game, pirate, next_location):
     """
     the function controls the asteroid behavior of the pirate.
     strategy: checks if thepirate is goiing to collide with an asteroid. if so,
@@ -11,7 +11,7 @@ def asteroid_behavior(game, pirate, next_location):
     :param game: the current game state, pirate: a pirate, next_location: the pirates next location
     :type game: PirateGame, pirate: Pirate, next_location: Location
     """
-    acted = False  # 
+    acted = False  # func rets True if pirate acted during it
     if len(game.get_living_asteroids()) >= 1:
         for asteroid in game.get_living_asteroids():
             a_is_close = (pirate.distance(asteroid) <= pirate.push_range)
