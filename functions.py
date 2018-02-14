@@ -37,6 +37,7 @@ def asteroid_behavior(game, pirate, next_location):
 					pirate.sail(asteroid.location.add(x1, y1)
 			else:
 				pass # not sure if other situation is needed
+				# this is a comment
 				
 
 def asteroid_linear(game, asteroid, n, turns=[]):
@@ -211,9 +212,3 @@ def desirable_mothership(game, pirate):
             minimal_distance = mothership.distance(pirate)
     return minimal_mothership
 
-
-
-
-								
-
-								
