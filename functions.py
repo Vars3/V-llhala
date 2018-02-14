@@ -11,47 +11,8 @@ def asteroid_behavior(game, pirate, next_location):
     :param game: the current game state, pirate: a pirate, next_location: the pirates next location
     :type game: PirateGame, pirate: Pirate, next_location: Location
     """
-    acted = False  # 
-    if len(game.get_living_asteroids()) >= 1:
-        for asteroid in game.get_living_asteroids():
-            a_is_close = (pirate.distance(asteroid) <= pirate.push_range)
-            p_can_push = pirate.can_push(asteroid)
-            #a_is_in_direction =
-            if a_is_close and p_can_push:
-                pirate.push(asteroid, (asteroid.direction * (-1)))  # for now assume there are no friendly pirates there
-            elif a_is_close and pirate.push_reload_turns > 0:
-            # if (asteroid.location + asteroid.direction) == pirate_loc_next_turn(game, pirate)
-            # #<<func not yet written>>, maybe not needed
-                # check if asteroid will hit pirate in 5 turns
-                will_hit = False
-                for t in asteroid_linear(game, asteroid, 5):
-                    if t is pirate.location:
-                        will_hit = True
-                if will_hit: # if it will not hit in 5:
-                    if pirate.location.row > 3200:
-                        y1 = 400
-                    else:
-                            y1 = 6000
-                            if pirate.location.col > 3200:
-                                x1 = 400
-                            else:
-                                x1 = 6000
-                    pirate.sail(asteroid.location.add(x1, y1))
-            else:
-                pass  # not sure if other situation is needed
-
-
-def asteroid_linear(game, asteroid, n, turns=[]):
-    """
-    The function creates a list of next n locations the asteroid will be at.
-    It assumes it won't be pushed, and won't be destroyed during n turns.
-
-    :param game: the current game state, asteroid: the asteroid, n: number of turns to check, turns: empty list
-    :type game: PirateGame, asteroid: Asteroid, n: int
-    """
-    if n > 1:
-        return turns.append(asteroid_linear(game, asteroid, (n-1)))
-    return turns.append(asteroid.location + asteroid.direction)
+    for asteroid in game.get_living_asteroids():
+        pass
 
 
 def open_capsule(game, capsules_list):
